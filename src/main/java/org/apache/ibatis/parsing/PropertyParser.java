@@ -46,12 +46,24 @@ public class PropertyParser {
   private static final String ENABLE_DEFAULT_VALUE = "false";
   private static final String DEFAULT_VALUE_SEPARATOR = ":";
 
+  /**
+   * private修饰构造方法，禁止构造PropertyParser对象，因为这是一个静态方法的工具类
+   */
   private PropertyParser() {
     // Prevent Instantiation
   }
 
+  /**
+   * 基于variables变量，替换string字符串中的动态属性，并返回结果
+   *
+   * @param string
+   * @param variables
+   * @return
+   */
   public static String parse(String string, Properties variables) {
+    // <2.1> handler 类型为 VariableTokenHandler ，也就是说，通过它实现自定义的处理逻辑
     VariableTokenHandler handler = new VariableTokenHandler(variables);
+    // <2.2> openToken = { ，closeToken = } ，这不就是上面看到的 ${username} 和 {password} 的么。
     GenericTokenParser parser = new GenericTokenParser("${", "}", handler);
     return parser.parse(string);
   }
@@ -63,7 +75,9 @@ public class PropertyParser {
 
     private VariableTokenHandler(Properties variables) {
       this.variables = variables;
+      // 是否开启默认值功能
       this.enableDefaultValue = Boolean.parseBoolean(getPropertyValue(KEY_ENABLE_DEFAULT_VALUE, ENABLE_DEFAULT_VALUE));
+      // 分隔符
       this.defaultValueSeparator = getPropertyValue(KEY_DEFAULT_VALUE_SEPARATOR, DEFAULT_VALUE_SEPARATOR);
     }
 
@@ -75,6 +89,7 @@ public class PropertyParser {
     public String handleToken(String content) {
       if (variables != null) {
         String key = content;
+        // 开启默认值功能
         if (enableDefaultValue) {
           final int separatorIndex = content.indexOf(defaultValueSeparator);
           String defaultValue = null;
@@ -82,10 +97,12 @@ public class PropertyParser {
             key = content.substring(0, separatorIndex);
             defaultValue = content.substring(separatorIndex + defaultValueSeparator.length());
           }
+          // 有默认值，优先替换，不存在则返回默认值
           if (defaultValue != null) {
             return variables.getProperty(key, defaultValue);
           }
         }
+        // 未开启默认值
         if (variables.containsKey(key)) {
           return variables.getProperty(key);
         }

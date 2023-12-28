@@ -29,6 +29,7 @@ public class GetFieldInvoker implements Invoker {
     this.field = field;
   }
 
+  // 获得属性
   @Override
   public Object invoke(Object target, Object[] args) throws IllegalAccessException {
     try {

@@ -46,6 +46,7 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T create(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
+    // 获得需要创建的类
     Class<?> classToCreate = resolveInterface(type);
     // we know types are assignable
     return (T) instantiateClass(classToCreate, constructorArgTypes, constructorArgs);
@@ -120,8 +121,17 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
     return classToCreate;
   }
 
+  /**
+   * 判断是否为集合类
+   *
+   * @param type Object type
+   * @return
+   * @param <T>
+   */
   @Override
   public <T> boolean isCollection(Class<T> type) {
+    // isAssignableFrom底层方法，用C/C++实现
+    // 如果是A.isAssignableFrom(B) 确定一个类(B)是不是继承来自于另一个父类(A)，一个接口(A)是不是实现了另外一个接口(B)，或者两个类相同
     return Collection.class.isAssignableFrom(type);
   }
 

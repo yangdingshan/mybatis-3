@@ -28,13 +28,23 @@ public final class PropertyCopier {
     // Prevent Instantiation of Static Class
   }
 
+  /**
+   * 将sourceBean的属性，复制到destinationBean中
+   *
+   * @param type 指定类
+   * @param sourceBean 来源Bean对象
+   * @param destinationBean 目标Bean对象
+   */
   public static void copyBeanProperties(Class<?> type, Object sourceBean, Object destinationBean) {
+    // 循环，从当前类开始，不断复制到父类，直到父类不存在
     Class<?> parent = type;
     while (parent != null) {
+      // 读取所有属性
       final Field[] fields = parent.getDeclaredFields();
       for(Field field : fields) {
         try {
           try {
+            // destinationBean设置field属性
             field.set(destinationBean, field.get(sourceBean));
           } catch (IllegalAccessException e) {
             if (Reflector.canControlMemberAccessible()) {
@@ -48,6 +58,7 @@ public final class PropertyCopier {
           // Nothing useful to do, will only fail on final fields, which will be ignored.
         }
       }
+      // 获取父类
       parent = parent.getSuperclass();
     }
   }
