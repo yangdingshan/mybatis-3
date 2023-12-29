@@ -23,6 +23,8 @@ import org.apache.ibatis.reflection.factory.ObjectFactory;
 import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
+ * 集合类处理
+ *
  * @author Clinton Begin
  */
 public class CollectionWrapper implements ObjectWrapper {

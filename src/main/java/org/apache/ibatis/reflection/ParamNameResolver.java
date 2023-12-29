@@ -28,6 +28,10 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+/**
+ * 参数解析器
+ *
+ */
 public class ParamNameResolver {
 
   private static final String GENERIC_NAME_PREFIX = "param";
@@ -56,11 +60,13 @@ public class ParamNameResolver {
     int paramCount = paramAnnotations.length;
     // get names from @Param annotations
     for (int paramIndex = 0; paramIndex < paramCount; paramIndex++) {
+      // 忽略，如果是特殊参数
       if (isSpecialParameter(paramTypes[paramIndex])) {
         // skip special parameters
         continue;
       }
       String name = null;
+      // 首先，从 @Param 注解中获取参数
       for (Annotation annotation : paramAnnotations[paramIndex]) {
         if (annotation instanceof Param) {
           hasParamAnnotation = true;
@@ -70,9 +76,11 @@ public class ParamNameResolver {
       }
       if (name == null) {
         // @Param was not specified.
+        // 获取真实的参数名
         if (config.isUseActualParamName()) {
           name = getActualParamName(method, paramIndex);
         }
+        // 最差，使用 map 的顺序，作为编号
         if (name == null) {
           // use the parameter index as the name ("0", "1", ...)
           // gcode issue #71
@@ -81,6 +89,7 @@ public class ParamNameResolver {
       }
       map.put(paramIndex, name);
     }
+    // 构建不可变集合
     names = Collections.unmodifiableSortedMap(map);
   }
 
@@ -100,6 +109,7 @@ public class ParamNameResolver {
   }
 
   /**
+   * 获得参数名与值的映射
    * <p>
    * A single non-special parameter is returned without a name.
    * Multiple parameters are named using the naming rule.
@@ -109,8 +119,10 @@ public class ParamNameResolver {
    */
   public Object getNamedParams(Object[] args) {
     final int paramCount = names.size();
+    // 没有参数直接返回null
     if (args == null || paramCount == 0) {
       return null;
+      // 只有一个非注解的参数，直接返回首元素
     } else if (!hasParamAnnotation && paramCount == 1) {
       return args[names.firstKey()];
     } else {

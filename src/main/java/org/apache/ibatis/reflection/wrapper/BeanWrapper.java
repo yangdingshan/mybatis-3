@@ -147,6 +147,12 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  /**
+   * 是否有指定属性的 getting 方法
+   *
+   * @param name
+   * @return
+   */
   @Override
   public boolean hasGetter(String name) {
     PropertyTokenizer prop = new PropertyTokenizer(name);
@@ -166,9 +172,18 @@ public class BeanWrapper extends BaseWrapper {
     }
   }
 
+  /**
+   * 创建指定属性的值
+   *
+   * @param name
+   * @param prop
+   * @param objectFactory
+   * @return
+   */
   @Override
   public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
     MetaObject metaValue;
+    // 获得 setting 方法的方法参数类型
     Class<?> type = getSetterType(prop.getName());
     try {
       Object newObject = objectFactory.create(type);
@@ -214,11 +229,22 @@ public class BeanWrapper extends BaseWrapper {
     return false;
   }
 
+  /**
+   * 不是集合不能添加，直接抛错
+   *
+   * @param element
+   */
   @Override
   public void add(Object element) {
     throw new UnsupportedOperationException();
   }
 
+  /**
+   * 不是集合不能添加，直接抛错
+   *
+   * @param list
+   * @param <E>
+   */
   @Override
   public <E> void addAll(List<E> list) {
     throw new UnsupportedOperationException();
