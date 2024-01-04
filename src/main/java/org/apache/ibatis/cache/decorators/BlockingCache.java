@@ -31,13 +31,28 @@ import org.apache.ibatis.cache.CacheException;
  * It sets a lock over a cache key when the element is not found in cache.
  * This way, other threads will wait until this element is filled instead of hitting the database.
  *
+ *
+ * 阻塞的 Cache 实现类。
+ *
+ * 这里的阻塞比较特殊，当线程去获取缓存值时，如果不存在，则会阻塞后续的其他线程去获取该缓存。
+ * 为什么这么有这样的设计呢？因为当线程 A 在获取不到缓存值时，一般会去设置对应的缓存值，这样就避免其他也需要该缓存的线程 B、C 等，重复添加缓存。
  * @author Eduardo Macarron
  *
  */
 public class BlockingCache implements Cache {
 
+  /**
+   * 阻塞等待超时时间
+   */
   private long timeout;
+  /**
+   * 装饰的 Cache 对象
+   */
   private final Cache delegate;
+
+  /**
+   * 缓存键与 ReentrantLock 对象的映射
+   */
   private final ConcurrentHashMap<Object, ReentrantLock> locks;
 
   public BlockingCache(Cache delegate) {
@@ -58,8 +73,10 @@ public class BlockingCache implements Cache {
   @Override
   public void putObject(Object key, Object value) {
     try {
+      // 添加缓存
       delegate.putObject(key, value);
     } finally {
+      // 释放锁
       releaseLock(key);
     }
   }
@@ -69,6 +86,11 @@ public class BlockingCache implements Cache {
     acquireLock(key);
     Object value = delegate.getObject(key);
     if (value != null) {
+      /**
+       * 获得缓存值成功时，会释放锁，这样被阻塞等待的其他线程就可以去获取缓存了。
+       * 但是，如果获得缓存值失败时，就需要在 #putObject(Object key, Object value) 方法中，添加缓存时，才会释放锁，
+       * 这样被阻塞等待的其它线程就不会重复添加缓存了。
+       */
       releaseLock(key);
     }
     return value;
