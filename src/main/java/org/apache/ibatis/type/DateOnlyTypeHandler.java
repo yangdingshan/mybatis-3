@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.Date;
 
 /**
+ * 继承 BaseTypeHandler 抽象类，Date 类型的 TypeHandler 实现类
  * @author Clinton Begin
  */
 public class DateOnlyTypeHandler extends BaseTypeHandler<Date> {
